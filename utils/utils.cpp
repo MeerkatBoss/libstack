@@ -19,16 +19,13 @@ hash_t GetHash(const void* data, size_t length)
     return result;
 }
 
-static jmp_buf jump_buffer = {};
-static volatile int is_bad_ptr;
-
 int CanReadPointer(const void *ptr)
 {
     if (!ptr)
         return 0;
     
     int fd = open("/dev/random", O_RDWR);
-    int res = write(fd, ptr, 1);
+    ssize_t res = write(fd, ptr, 1);
     close(fd);
 
     return res >= 0;

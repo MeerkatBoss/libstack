@@ -3,7 +3,7 @@
 
 #define USE_CUSTOM_ELEMENT
 typedef int element_t;
-const element_t element_poison = 0xDEADBEEF;
+const element_t element_poison = (int)0xDEADBEEF;
 
 inline int IsPoison(element_t element) { return element == element_poison; }
 

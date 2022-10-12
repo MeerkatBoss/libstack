@@ -336,16 +336,15 @@ unsigned int StackAssert_(const Stack* stack,
     if (!errs && !force)
         return STK_NO_ERROR;
 
-    message_level level = errs ? MSG_ERROR : MSG_INFO;
+    message_level level = errs ? MSG_ERROR : MSG_TRACE;
 
-    log_message(level, "Dumping stack[%p] (status: %s)\n"
-        "\tin %s:%zu in file \'%s\'\n",
+    log_message(level, "Dumping stack[%p] (status: %s)",
             stack,
-            errs ? "CORRUPTED" : "ok",
-            func, line, file);
+            errs ? "CORRUPTED" : "ok");
+    log_message(level, "\tin %s:%zu in file \'%s\'", func, line, file);
     
     _ON_DEBUG_INFO(
-    log_message(level, "Stack \'%s\' declared in %s on line %zu, file \'%s\'\n",
+    log_message(level, "Stack \'%s\' declared in %s on line %zu, file \'%s\'",
             stack->debug_.name,
             stack->debug_.func_name,
             stack->debug_.line_num,
@@ -357,40 +356,39 @@ unsigned int StackAssert_(const Stack* stack,
         log_message(level, "Error flags: %o\n", errs);
 
     _ON_HASH(
-    log_message(level, "Hash:"
-            "\tstored: %#llx\n"
-            "\tactual: %#llx\n",
-            stack->hash_, GetStackHash_(stack));
+    log_message(level, "Hash:");
+    log_message(level, "\tstored: %#llx" ,stack->hash_);
+    log_message(level, "\tactual: %#llx\n", GetStackHash_(stack));
     )
 
     // TODO: Extractable!
     _ON_CANARY(
-    log_message(level, "Canary state:\n"
-        "\tstart: %#016llx ^ %#016llx\n"
-        "\tend  : %#016llx ^ %#016llx\n",
-        CANARY, stack->canary_start_ ^ CANARY,
+    log_message(level, "Canary state:");
+    log_message(level, "\tstart: %#016llx ^ %#016llx",
+        CANARY, stack->canary_start_ ^ CANARY);
+    log_message(level, "\tend  : %#016llx ^ %#016llx",
         CANARY, stack->canary_end_   ^ CANARY);
     )
 
     // TODO: Extractable!
-    log_message(level, "Elements stored: %zu\n"
-        "Total capacity : %zu\n",
-        stack->size,
+    log_message(level, "Elements stored: %zu",
+        stack->size);
+    log_message(level, "Total capacity : %zu\n",
         stack->capacity);
     
     _ON_HASH(
-        log_message(level, "Data hash:\n"
-                "\tstored: %#llx\n"
-                "\tactual: %#llx\n",
-                stack->data_hash_,
+        log_message(level, "Data hash:");
+        log_message(level, "\tstored: %#llx",
+                stack->data_hash_);
+        log_message(level, "\tactual: %#llx",
                 GetHash(stack->data, stack->capacity));
     )
     
     // TODO: Extractable!
-    log_message(level, "Data[%p]:\n", stack->data);
+    log_message(level, "Data[%p]:", stack->data);
     if (errs & STK_BAD_DATA_PTR) // TODO: Mix of conditinally and uncoditionally compilated, can you reduce?
     {
-        log_message(level, "\tNOT READABLE\n");
+        log_message(level, "\tNOT READABLE");
         return errs;
     }
 
@@ -398,32 +396,34 @@ unsigned int StackAssert_(const Stack* stack,
     canary_t* start = ((canary_t*) stack->data)- 1;
 
     if (CanReadPointer(start))
-        log_message(level, "\tcanary: %#016llx\n", *start);
+        log_message(level, "\tcanary: %#016llx", *start);
     else
-        log_message(level, "\tcanary: NOT READABLE\n");
+        log_message(level, "\tcanary: NOT READABLE");
     )
 
     for (size_t i = 0; i < stack->capacity; i++)
     {
         if (!CanReadPointer(stack->data + i) || IsPoison(stack->data[i]))
             log_message(level, "\t%c[%zu]: %s",
+                    i < stack->size ? '*' : ' ',
+                    i,
                     CanReadPointer(stack->data + i)
                         ? "POISON"
                         : "NOT READABLE");
-            
-        log_message(level, "\t%c[%zu]: " ELEMENT_SPEC,
-            i < stack->size ? '*' : ' ',
-            i,
-            ELEMENT_ARGS(stack->data[i]));
+        else
+            log_message(level, "\t%c[%zu]: " ELEMENT_SPEC,
+                i < stack->size ? '*' : ' ',
+                i,
+                ELEMENT_ARGS(stack->data[i]));
     }
 
     _ON_CANARY(
     canary_t* end = (canary_t*)(stack->data + stack->capacity);
 
     if (CanReadPointer(end))
-        log_message(level, "\tcanary: %#016llx\n", *end);
+        log_message(level, "\tcanary: %#016llx", *end);
     else
-        log_message(level, "\tcanary: NOT READABLE\n");
+        log_message(level, "\tcanary: NOT READABLE");
     )
 
     return errs;
