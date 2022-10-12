@@ -257,7 +257,7 @@ element_t* StackPeek      (const Stack* stack, unsigned int* err = NULL)
     }
 
     TRY_ASSIGN_PTR(err, err_flags);
-    return stack->data + stack->size;
+    return stack->data + stack->size - 1;
 }
 
 unsigned int StackCheck_(const Stack* stack)
