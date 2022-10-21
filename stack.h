@@ -331,7 +331,10 @@ unsigned int StackAssert_(const Stack* stack,
                             size_t       line,
                             int force = 0)
 {
-    unsigned int errs = StackCheck_(stack);
+    unsigned int errs = 0;
+    _ON_STACK_CHECK(
+        errs = StackCheck_(stack);
+    )
     
     if (!errs && !force)
         return STK_NO_ERROR;
@@ -460,14 +463,18 @@ element_t* ReallocWithCanary_(element_t* old_array,
         return result;
     )
     _NO_CANARY(
-        return realloc(old_array, new_size);
+        return (element_t*)realloc(old_array, new_size * sizeof(element_t));
     )
 
 }
 
 void FreeWithCanary_(element_t* ptr)
 {
-    free((canary_t*)ptr - 1);
+    _ON_CANARY(
+        free((canary_t*)ptr - 1);
+        return;
+    )
+    free(ptr);
 }
 
 inline size_t GetNewCapacity_(size_t size)
