@@ -96,7 +96,7 @@ int         StackTryGrow_       (Stack* stack);
 
 /**
  * @brief 
- * Ensure stack has no eccess capacity
+ * Ensure stack has no excess capacity
  * @param[inout] stack `Stack` instance
  * @return zero upon success, non-zero otherwise
  */

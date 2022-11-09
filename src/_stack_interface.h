@@ -240,10 +240,10 @@ element_t* StackPeek      (const Stack* stack, unsigned int* err);
  * @param[in] line  calling line number
  */
 unsigned int    StackAssert_       (const Stack*  stack,
-                              const char*   func,
-                              const char*   file,
-                              size_t        line,
-                              int force_dump);
+                                    const char*   func,
+                                    const char*   file,
+                                    size_t        line,
+                                    int force_dump);
 
 /**
  * @brief 
@@ -255,7 +255,7 @@ unsigned int    StackAssert_       (const Stack*  stack,
                                     __PRETTY_FUNCTION__,\
                                     __FILE__, __LINE__, 0)
 
-#define StackDump(stack) StackAssert_(stack,          \
+#define StackDump(stack) StackAssert_(stack,            \
                                     __PRETTY_FUNCTION__,\
                                     __FILE__, __LINE__, 1)
 
